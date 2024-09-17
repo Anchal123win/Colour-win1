@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Colour Prediction</title> 
+  <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f4f4f9;
+        }
+
+        /* Page Container */
+        .page {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        /* Visible Page */
+        .page.active {
+            display: flex;
+        }
+
+        /* Container Styles */
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            z-index: 2;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #007BFF;
+            font-weight: bold;
+        }
+
+        .website-options img {
+            width: 150px;
+            height: 100px;
+            margin: 15px;
+            cursor: pointer;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .website-options img:hover {
+            transform: scale(1.05);
+            transition: all 0.3s ease;
+        }
+
+        label {
+            font-size: 18px;
+            display: block;
+            margin: 15px 0 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="number"], input[type="password"], button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            border: 2px solid #007BFF;
+            border-radius: 8px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #007BFF;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tick {
+            color: green;
+            font-size: 48px;
+        }
+
+    </style> 
+ </head> 
+ <body> <!-- Website Selection Page --> 
+  <div id="websiteSelectionPage" class="page active"> 
+   <h1>Choose Your Website</h1> 
+   <div class="website-options"> 
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSsnmYswWXF4YM_TahibsIF-2_dp6Tp83rL_Q&amp;usqp=CAU" alt="Website 1" onclick="goToLogin()"> 
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQi8ZqU7owtJ82jBPbOUQPIFp0pfkbE2Dzkog&amp;usqp=CAU" alt="Website 2" onclick="goToLogin()"> 
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc7MDR1aL1o0jBlsbWszWhNcaGqoeUPpGmzw&amp;usqp=CAU" alt="Website 3" onclick="goToLogin()"> 
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8rnhU9aOJe1NxTWivNTJKGk6GpQwlSNTuZA&amp;usqp=CAU" alt="Website 4" onclick="goToLogin()"> 
+   </div> 
+  </div> <!-- Login Page --> 
+  <div id="loginPage" class="page"> 
+   <div class="container"> 
+    <h1>Colour Prediction</h1> 
+    <form id="loginForm"> <label for="mobileNumber">Enter Mobile Number:</label> 
+     <input type="number" id="mobileNumber" name="mobileNumber" required> <label for="password">Enter Password:</label> 
+     <input type="password" id="password" name="password" required> <button type="button" onclick="login()">Login</button> 
+    </form> 
+    <div id="loginResult" class="hidden"> <span class="tick">✔</span> 
+     <p class="success">Successfully Logged In!</p> 
+    </div> 
+   </div> 
+  </div> <!-- Prediction Page --> 
+  <div id="predictionPage" class="page"> 
+   <div class="container"> 
+    <h1>Make Your Prediction</h1> 
+    <form id="gameForm"> <label for="period">Enter Period Number:</label> 
+     <input type="number" id="period" name="period" min="1" required> <label for="amount">Enter Amount (in Rupees):</label> 
+     <input type="number" id="amount" name="amount" min="1" required> <button type="button" onclick="playGame()">Play</button> 
+    </form> 
+    <div id="loading" class="spinner hidden"></div> 
+    <div id="gameResult" class="hidden"></div> 
+   </div> 
+  </div> 
+  <script>
+    // Function to show only the next page
+    function showPage(pageId) {
+        const pages = document.querySelectorAll('.page');
+        pages.forEach(page => page.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+    }
+
+    // Function to move from the website selection page to the login page
+    function goToLogin() {
+        showPage('loginPage');
+    }
+
+    // Function to handle login
+    function login() {
+        const mobileNumber = document.getElementById("mobileNumber").value;
+        const password = document.getElementById("password").value;
+
+        if (!mobileNumber || !password) {
+            alert("Please fill in all the fields!");
+            return;
+        }
+
+        // Simulate a login and show success message
+        document.getElementById("loginForm").classList.add("hidden");
+        document.getElementById("loginResult").classList.remove("hidden");
+
+        setTimeout(function () {
+            // After success, load the prediction page
+            showPage('predictionPage');
+        }, 1500);
+    }
+
+    // Function to handle the game (Big or Small)
+    function playGame() {
+        const period = document.getElementById("period").value;
+        const amount = document.getElementById("amount").value;
+
+        if (!period || !amount) {
+            alert("Please enter both period number and amount!");
+            return;
+        }
+
+        // Show the loading spinner
+        document.getElementById("loading").classList.remove("hidden");
+        document.getElementById("gameResult").classList.add("hidden");
+
+        setTimeout(function () {
+            // Generate a random result
+            const randomResult = Math.random() < 0.5 ? "Big" : "Small";
+
+            // Hide spinner and show the result
+            document.getElementById("loading").classList.add("hidden");
+
+            const resultDiv = document.getElementById("gameResult");
+            resultDiv.innerHTML = `Period Number: ${period}<br>Amount: ₹${amount}<br><strong style="color: ${randomResult === 'Big' ? 'green' : 'red'};">${randomResult}</strong>`;
+            resultDiv.classList.remove("hidden");
+
+        }, 1000);
+    }
+</script> 
+ </body>
+</html>
